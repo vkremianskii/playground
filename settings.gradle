@@ -1,0 +1,6 @@
+rootProject.name = 'playground'
+include 'common'
+include 'common-rest'
+include 'zettlekasten-api'
+include 'zettlekasten-app'
+

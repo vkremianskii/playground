@@ -1,0 +1,45 @@
+buildscript {
+    dependencies {
+        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
+    }
+}
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'java'
+    id 'jvm-test-suite'
+}
+
+testing {
+    suites {
+        test {
+            useJUnitJupiter()
+        }
+        integrationTest(JvmTestSuite) {
+            dependencies {
+                implementation project()
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation project(':common-rest')
+    implementation project(':zettlekasten-api')
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += sourceSets.main.compileClasspath
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'net.kremianskii.zettlekasten.Application'
+    }
+}
