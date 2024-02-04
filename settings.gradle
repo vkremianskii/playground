@@ -3,4 +3,5 @@ include 'common'
 include 'common-rest'
 include 'zettlekasten-api'
 include 'zettlekasten-app'
+include 'zettlekasten-client'
 

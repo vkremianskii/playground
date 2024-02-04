@@ -7,7 +7,7 @@ import net.kremianskii.zettlekasten.resource.ArchiveResource;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -19,13 +19,14 @@ public final class Application {
 
     public static void main(String[] args) throws IOException {
         final var application = new Application();
-        application.run(() -> false);
+        final var zettlekastenDirectory = createTempDirectory("zettlekasten");
+        application.run(zettlekastenDirectory, () -> false);
     }
 
-    void run(BooleanSupplier cancelled) throws IOException {
+    void run(final Path zettlekastenDirectory,
+             final BooleanSupplier cancelled) throws IOException {
         final var address = new InetSocketAddress("localhost", 8080);
-        final var archiveRootDirectory = createTempDirectory("zettlekasten");
-        final var resources = List.of(new ArchiveResource(new FilesArchiveRepository(archiveRootDirectory)));
+        final var resources = List.of(new ArchiveResource(new FilesArchiveRepository(zettlekastenDirectory)));
         final var server = startHttpServer(address, resources);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             server.stop((int) HTTP_SERVER_STOP_DELAY.toSeconds());

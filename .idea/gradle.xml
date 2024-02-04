@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/common-rest" />
             <option value="$PROJECT_DIR$/zettlekasten-api" />
             <option value="$PROJECT_DIR$/zettlekasten-app" />
+            <option value="$PROJECT_DIR$/zettlekasten-client" />
           </set>
         </option>
       </GradleProjectSettings>

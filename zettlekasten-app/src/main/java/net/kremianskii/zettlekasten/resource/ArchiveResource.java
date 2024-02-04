@@ -4,7 +4,8 @@ import com.sun.net.httpserver.HttpExchange;
 import net.kremianskii.common.rest.Resource;
 import net.kremianskii.common.rest.Route;
 import net.kremianskii.common.rest.http.HttpMethod;
-import net.kremianskii.zettlekasten.domain.Archive;
+import net.kremianskii.zettlekasten.api.Archive;
+import net.kremianskii.zettlekasten.api.Note;
 import net.kremianskii.zettlekasten.domain.ArchiveRepository;
 
 import java.io.IOException;
@@ -23,6 +24,14 @@ public final class ArchiveResource extends Resource {
     }
 
     private Optional<Archive> getArchive(HttpExchange exchange) throws IOException {
-        return repository.find();
+        return repository.find().map(this::archiveFromDomainArchive);
+    }
+
+    private Archive archiveFromDomainArchive(net.kremianskii.zettlekasten.domain.Archive archive) {
+        return new Archive(archive.notes.stream().map(this::noteFromDomainNote).toList());
+    }
+
+    private Note noteFromDomainNote(net.kremianskii.zettlekasten.domain.Note note) {
+        return new Note(note.name(), note.text(), note.tags);
     }
 }
