@@ -1,5 +1,6 @@
 package net.kremianskii.zettlekasten.data;
 
+import net.kremianskii.common.FileUtil;
 import net.kremianskii.zettlekasten.api.NoteName;
 import net.kremianskii.zettlekasten.api.Tag;
 import net.kremianskii.zettlekasten.domain.Archive;
@@ -17,11 +18,13 @@ import java.util.Optional;
 import static java.lang.System.lineSeparator;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
+import static java.nio.file.Files.list;
 import static java.nio.file.Files.newBufferedReader;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.walkFileTree;
 import static java.util.stream.Collectors.joining;
 import static net.kremianskii.common.Checks.checkNonNull;
+import static net.kremianskii.common.FunctionUtil.unchecked;
 
 public final class FilesArchiveRepository implements ArchiveRepository {
     private final Path rootDirectory;
@@ -32,6 +35,9 @@ public final class FilesArchiveRepository implements ArchiveRepository {
 
     @Override
     public void save(Archive archive) throws IOException {
+        try (final var files = list(rootDirectory)) {
+            files.forEach(unchecked(FileUtil::deleteRecursively));
+        }
         for (final var note : archive.notes) {
             final var notePath = Paths.get(rootDirectory.toString(), filenameFromNoteName(note.name()));
             try (final var writer = newBufferedWriter(notePath)) {

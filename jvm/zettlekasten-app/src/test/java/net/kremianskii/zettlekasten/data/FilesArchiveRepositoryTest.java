@@ -81,6 +81,7 @@ class FilesArchiveRepositoryTest {
                 Set.of(new Tag("tag1"), new Tag("tag2"))),
             aNote(new NoteName("name2"), "", Set.of())
         ));
+        createDirectory(Paths.get(rootDirectory.toString(), "child"));
 
         // when
         repository.save(archive);
