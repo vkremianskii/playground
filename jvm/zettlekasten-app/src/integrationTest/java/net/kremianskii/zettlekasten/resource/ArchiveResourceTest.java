@@ -30,7 +30,7 @@ class ArchiveResourceTest extends ApplicationFixture {
             .uri(URI.create("http://localhost:8080/archive"))
             .timeout(Duration.ofSeconds(2))
             .build();
-        var notePath = Paths.get(zettlekastenDirectory.toString(), "note.md");
+        var notePath = Paths.get(config.zettlekasten().dir().toString(), "note.md");
         try (var noteWriter = newBufferedWriter(notePath)) {
             noteWriter.append("text");
             noteWriter.newLine();

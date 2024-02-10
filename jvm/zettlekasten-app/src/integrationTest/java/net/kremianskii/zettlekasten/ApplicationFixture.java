@@ -2,41 +2,40 @@ package net.kremianskii.zettlekasten;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import net.kremianskii.zettlekasten.config.Config;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.delete;
 import static java.nio.file.Files.walkFileTree;
+import static net.kremianskii.zettlekasten.Application.parseConfig;
 
 public class ApplicationFixture {
     protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
         .registerModule(new Jdk8Module());
-    protected static Path zettlekastenDirectory;
-    protected static InetSocketAddress address;
+    protected static Config config;
 
     static Application application;
 
     @BeforeAll
     static void setup() throws IOException {
-        zettlekastenDirectory = createTempDirectory("zettlekasten");
-        address = new InetSocketAddress("localhost", 8080);
-        application = new Application(zettlekastenDirectory, address);
+        config = parseConfig(URI.create("classpath:/test-config.yml"));
+        application = new Application(config);
         application.start();
     }
 
     @AfterAll
     static void tearDown() throws IOException {
         application.stop();
-        deleteRecursively(zettlekastenDirectory);
+        deleteRecursively(config.zettlekasten().dir());
     }
 
     static void deleteRecursively(Path path) throws IOException {

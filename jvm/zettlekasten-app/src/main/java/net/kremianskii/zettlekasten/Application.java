@@ -1,43 +1,51 @@
 package net.kremianskii.zettlekasten;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.javalin.Javalin;
 import net.kremianskii.common.rest.Resource;
+import net.kremianskii.zettlekasten.config.Config;
 import net.kremianskii.zettlekasten.data.FilesArchiveRepository;
 import net.kremianskii.zettlekasten.resource.ArchiveResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.file.Path;
+import java.net.URI;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.nio.file.Files.createTempDirectory;
 import static net.kremianskii.common.Checks.checkEqual;
 import static net.kremianskii.common.Checks.checkNonNull;
 import static net.kremianskii.common.Checks.checkThat;
 
 public final class Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition stoppingCondition = lock.newCondition();
-    private final Path zettlekastenDirectory;
-
-    private final InetSocketAddress address;
+    private final Config config;
 
     private State state = State.INITIAL;
     private Javalin javalin;
 
-    public Application(final Path zettlekastenDirectory,
-                       final InetSocketAddress address) {
-        this.zettlekastenDirectory = checkNonNull(zettlekastenDirectory, "zettlekastenDirectory");
-        this.address = checkNonNull(address, "address");
+    public Application(final Config config) {
+        this.config = checkNonNull(config, "config");
     }
 
-    void start() {
+    void start() throws IOException {
         lock.lock();
         try {
             checkEqual(state, State.INITIAL, "Must be in Initial state");
+            final var address = new InetSocketAddress(config.server().port());
+            if (!Files.exists(config.zettlekasten().dir())) {
+                Files.createDirectories(config.zettlekasten().dir());
+            }
             javalin = startJavalin(address, resources());
             state = State.STARTED;
         } finally {
@@ -80,7 +88,7 @@ public final class Application {
 
     private List<Resource> resources() {
         return List.of(
-            new ArchiveResource(new FilesArchiveRepository(zettlekastenDirectory)));
+            new ArchiveResource(new FilesArchiveRepository(config.zettlekasten().dir())));
     }
 
     private Javalin startJavalin(final InetSocketAddress address,
@@ -92,17 +100,33 @@ public final class Application {
             .start(address.getHostName(), address.getPort());
     }
 
-    public static void main(String[] args) throws IOException {
-        final var zettlekastenDirectory = createTempDirectory("zettlekasten");
-        final var address = new InetSocketAddress("localhost", 8080);
-        final var application = new Application(zettlekastenDirectory, address);
-        application.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(application::requestStop));
+    public static void main(String[] args) {
         try {
-            application.awaitStopping();
-        } catch (InterruptedException ignored) {
+            final var config = parseConfig(URI.create("classpath:/config.yml"));
+            final var application = new Application(config);
+            application.start();
+            Runtime.getRuntime().addShutdownHook(new Thread(application::requestStop));
+            try {
+                application.awaitStopping();
+            } catch (InterruptedException ignored) {
+            }
+            application.stop();
+        } catch (Exception exc) {
+            LOGGER.error("Application failure", exc);
         }
-        application.stop();
+    }
+
+    static Config parseConfig(URI uri) throws IOException {
+        if (!uri.getScheme().equals("classpath")) {
+            throw new IllegalArgumentException("URI must use classpath scheme");
+        }
+        final var resource = Application.class.getResource(uri.getPath());
+        if (resource == null) {
+            throw new RuntimeException("Classpath resource not found: " + uri.getPath());
+        }
+        final var file = new File(resource.getPath());
+        final var mapper = new ObjectMapper(new YAMLFactory());
+        return mapper.readValue(file, Config.class);
     }
 
     private enum State {
