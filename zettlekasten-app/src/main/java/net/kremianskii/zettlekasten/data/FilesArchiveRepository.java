@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.joining;
 import static net.kremianskii.common.Checks.checkNonNull;
 
 public final class FilesArchiveRepository implements ArchiveRepository {
-    final Path rootDirectory;
+    private final Path rootDirectory;
 
     public FilesArchiveRepository(final Path rootDirectory) {
         this.rootDirectory = checkNonNull(rootDirectory, "rootDirectory");

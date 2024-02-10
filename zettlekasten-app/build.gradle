@@ -5,17 +5,66 @@ buildscript {
 }
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version "${shadowJarVersion}"
-    id 'application'
+    id 'java-test-fixtures'
+    id 'org.flywaydb.flyway' version "${flywayVersion}"
+    id 'org.jooq.jooq-codegen-gradle' version "${jooqVersion}"
     id 'jvm-test-suite'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version "${shadowJarVersion}"
 }
 
 dependencies {
     implementation project(':common-rest')
+    implementation project(':common-data')
     implementation project(':zettlekasten-api')
+    implementation "com.zaxxer:HikariCP:${hikariCPVersion}"
     implementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+    runtimeOnly "com.h2database:h2:${h2Version}"
+    runtimeOnly "org.flywaydb:flyway-core:${flywayVersion}"
+    jooqCodegen "com.h2database:h2:${h2Version}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testFixturesImplementation project(':zettlekasten-api')
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${buildDir}/generated-sources/jooq"
+        }
+    }
+}
+
+flyway {
+    url = 'jdbc:h2:~/zettlekasten;MODE=PostgreSQL'
+    user = 'sa'
+    password = ''
+}
+
+jooq {
+    configuration {
+        jdbc {
+            url = 'jdbc:h2:~/zettlekasten;MODE=PostgreSQL'
+            user = 'sa'
+            password = ''
+        }
+        generator {
+            database {
+                inputSchema = 'PUBLIC'
+            }
+            target {
+                packageName = 'net.kremianskii.zettlekasten.db'
+            }
+        }
+    }
+}
+
+tasks.named('jooqCodegen') {
+    dependsOn 'flywayMigrate'
+}
+
+tasks.named('compileJava') {
+    dependsOn 'jooqCodegen'
 }
 
 testing {
@@ -25,22 +74,16 @@ testing {
         }
         integrationTest(JvmTestSuite) {
             dependencies {
-                implementation project()
+                implementation project.sourceSets.main.output
+                implementation project.sourceSets.testFixtures.output
+                implementation project.configurations.runtimeClasspath
             }
         }
     }
 }
 
-tasks.named("check") {
-    dependsOn(testing.suites.integrationTest)
-}
-
-sourceSets {
-    integrationTest {
-        java {
-            compileClasspath += sourceSets.main.compileClasspath
-        }
-    }
+tasks.named('check') {
+    dependsOn testing.suites.integrationTest
 }
 
 application {
