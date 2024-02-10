@@ -37,13 +37,13 @@ public final class DBArchiveRepository implements ArchiveRepository {
             for (final var note : archive.notes) {
                 txDsl.insertInto(NOTE)
                     .columns(NOTE.NAME, NOTE.TEXT)
-                    .values(note.name().value(), note.text())
+                    .values(note.name().value, note.text())
                     .execute();
                 final var noteId = txDsl.lastID().intValue();
                 for (final var tag : note.tags) {
                     txDsl.insertInto(NOTE_TAG)
                         .columns(NOTE_TAG.NOTE_ID, NOTE_TAG.TEXT)
-                        .values(noteId, tag.value())
+                        .values(noteId, tag.value)
                         .execute();
                 }
             }

@@ -2,9 +2,11 @@ package net.kremianskii.zettlekasten.domain;
 
 import net.kremianskii.zettlekasten.api.NoteName;
 import net.kremianskii.zettlekasten.api.Tag;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Objects.hash;
@@ -14,6 +16,7 @@ public final class Note {
     private NoteName name;
     private String text = "";
     public final Set<Tag> tags = new HashSet<>();
+    private @Nullable Category category = null;
 
     public Note(final NoteName name) {
         rename(name);
@@ -41,6 +44,14 @@ public final class Note {
 
     public boolean tagged(final Tag tag) {
         return tags.contains(tag);
+    }
+
+    public void setCategory(@Nullable final Category category) {
+        this.category = category;
+    }
+
+    public Optional<Category> category() {
+        return Optional.ofNullable(category);
     }
 
     @Override

@@ -43,10 +43,13 @@ class ArchiveResourceTest extends ApplicationFixture {
         assertEquals(List.of("application/json"), response.headers().allValues("Content-Type"));
         var archive = OBJECT_MAPPER.readValue(response.body(), Archive.class);
         assertEquals(
-            new Archive(List.of(new Note(
-                new NoteName("note"),
-                "text",
-                Set.of(new Tag("tag"))))),
+            new Archive(
+                List.of(new Note(
+                    new NoteName("note"),
+                    "text",
+                    Set.of(new Tag("tag")),
+                    null)),
+                List.of()),
             archive);
     }
 }

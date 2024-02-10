@@ -43,7 +43,7 @@ public final class FilesArchiveRepository implements ArchiveRepository {
             try (final var writer = newBufferedWriter(notePath)) {
                 writer.append(note.text());
                 final var hashtags = note.tags.stream()
-                    .map(tag -> "#" + tag.value())
+                    .map(tag -> "#" + tag.value)
                     .collect(joining(" "));
                 if (!hashtags.isEmpty()) {
                     writer.newLine();
@@ -109,7 +109,7 @@ public final class FilesArchiveRepository implements ArchiveRepository {
     }
 
     private String filenameFromNoteName(final NoteName name) {
-        return name.value() + ".md";
+        return name.value + ".md";
     }
 
     private NoteName noteNameFromFilename(final String filename) {

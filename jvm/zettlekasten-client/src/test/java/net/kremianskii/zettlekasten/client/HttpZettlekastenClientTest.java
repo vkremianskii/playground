@@ -31,14 +31,11 @@ class HttpZettlekastenClientTest {
         given(response.body()).willReturn("""
             {
                 "notes": [{
-                    "name": {
-                        "value": "name"
-                    },
+                    "name": "name",
                     "text": "text",
-                    "tags": [{
-                        "value": "tag"
-                    }]
-                }]
+                    "tags": ["tag"]
+                }],
+                "categories": []
             }
             """.getBytes());
 

@@ -10,6 +10,7 @@ import static java.util.Objects.hash;
 
 public final class Archive {
     public final List<Note> notes = new ArrayList<>();
+    public final List<Category> categories = new ArrayList<>();
 
     public void add(final Note note) {
         notes.add(note);

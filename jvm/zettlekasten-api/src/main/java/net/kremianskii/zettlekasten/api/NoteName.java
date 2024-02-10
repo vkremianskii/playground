@@ -1,13 +1,16 @@
 package net.kremianskii.zettlekasten.api;
 
+import net.kremianskii.common.Microtype;
+
 import java.util.regex.Pattern;
 
 import static net.kremianskii.common.Checks.checkThat;
 
-public record NoteName(String value) {
+public final class NoteName extends Microtype<String> {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z\\d\\s]+$");
 
-    public NoteName {
+    public NoteName(final String value) {
+        super(value);
         checkThat(
             value,
             v -> v != null && NAME_PATTERN.matcher(v).matches(),
