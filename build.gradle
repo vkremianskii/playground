@@ -5,10 +5,18 @@ subprojects {
         }
     }
 
+    apply plugin: 'java-library'
+
     group = 'net.kremianskii.playground'
     version = '1.0-SNAPSHOT'
 
     repositories {
         mavenCentral()
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
     }
 }
