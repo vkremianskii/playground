@@ -1,5 +1,6 @@
 package net.kremianskii.zettlekasten.data;
 
+import net.kremianskii.zettlekasten.api.NoteId;
 import net.kremianskii.zettlekasten.api.NoteName;
 import net.kremianskii.zettlekasten.api.Tag;
 import net.kremianskii.zettlekasten.domain.Archive;
@@ -36,14 +37,13 @@ public final class DBArchiveRepository implements ArchiveRepository {
             txDsl.deleteFrom(NOTE).execute();
             for (final var note : archive.notes) {
                 txDsl.insertInto(NOTE)
-                    .columns(NOTE.NAME, NOTE.TEXT)
-                    .values(note.name().value, note.text())
+                    .columns(NOTE.NOTE_ID, NOTE.NAME, NOTE.TEXT)
+                    .values(note.id.value, note.name().value, note.text())
                     .execute();
-                final var noteId = txDsl.lastID().intValue();
                 for (final var tag : note.tags) {
                     txDsl.insertInto(NOTE_TAG)
                         .columns(NOTE_TAG.NOTE_ID, NOTE_TAG.TEXT)
-                        .values(noteId, tag.value)
+                        .values(note.id.value, tag.value)
                         .execute();
                 }
             }
@@ -59,11 +59,14 @@ public final class DBArchiveRepository implements ArchiveRepository {
         if (records.isEmpty()) {
             return empty();
         }
-        final Map<Integer, Note> noteIdToNote = new HashMap<>();
+        final Map<NoteId, Note> noteIdToNote = new HashMap<>();
         for (final var record : records) {
+            final var noteId = new NoteId(record.get(NOTE.NOTE_ID));
             final var note = noteIdToNote.computeIfAbsent(
-                record.get(NOTE.NOTE_ID),
-                ignored -> new Note(new NoteName(record.get(NOTE.NAME))));
+                noteId,
+                ignored -> new Note(
+                    new NoteId(record.get(NOTE.NOTE_ID)),
+                    new NoteName(record.get(NOTE.NAME))));
             note.setText(record.get(NOTE.TEXT));
             note.tag(new Tag(record.get(NOTE_TAG.TEXT)));
         }

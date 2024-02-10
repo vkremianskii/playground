@@ -31,6 +31,7 @@ class HttpZettlekastenClientTest {
         given(response.body()).willReturn("""
             {
                 "notes": [{
+                    "id": "59148344-2ef0-44da-80e5-c9b7fbe04810",
                     "name": "name",
                     "text": "text",
                     "tags": ["tag"]

@@ -1,5 +1,6 @@
 package net.kremianskii.zettlekasten.domain;
 
+import net.kremianskii.zettlekasten.api.CategoryId;
 import net.kremianskii.zettlekasten.api.CategoryName;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,17 +11,29 @@ import static java.util.Objects.hash;
 import static net.kremianskii.common.Checks.checkNonNull;
 
 public final class Category {
+    public final CategoryId id;
     public final CategoryName name;
-    private final @Nullable Category parent;
+    private final @Nullable CategoryId parentId;
 
-    public Category(CategoryName name,
-                    @Nullable Category parent) {
+    public Category(CategoryId id,
+                    CategoryName name,
+                    @Nullable CategoryId parentId) {
+        this.id = checkNonNull(id, "id");
         this.name = checkNonNull(name, "name");
-        this.parent = parent;
+        this.parentId = parentId;
     }
 
-    public Optional<Category> parent() {
-        return Optional.ofNullable(parent);
+    public Optional<CategoryId> parentId() {
+        return Optional.ofNullable(parentId);
+    }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+            "id=" + id +
+            ", name=" + name +
+            ", parentId=" + parentId +
+            '}';
     }
 
     @Override
@@ -28,12 +41,13 @@ public final class Category {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final var category = (Category) o;
-        return Objects.equals(name, category.name) &&
-            Objects.equals(parent, category.parent);
+        return Objects.equals(id, category.id) &&
+            Objects.equals(name, category.name) &&
+            Objects.equals(parentId, category.parentId);
     }
 
     @Override
     public int hashCode() {
-        return hash(name, parent);
+        return hash(id, name, parentId);
     }
 }

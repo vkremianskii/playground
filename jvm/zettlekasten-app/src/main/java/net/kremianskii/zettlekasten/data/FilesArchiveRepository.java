@@ -1,6 +1,7 @@
 package net.kremianskii.zettlekasten.data;
 
 import net.kremianskii.common.FileUtil;
+import net.kremianskii.zettlekasten.api.NoteId;
 import net.kremianskii.zettlekasten.api.NoteName;
 import net.kremianskii.zettlekasten.api.Tag;
 import net.kremianskii.zettlekasten.domain.Archive;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.lang.System.lineSeparator;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -22,6 +24,7 @@ import static java.nio.file.Files.list;
 import static java.nio.file.Files.newBufferedReader;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.walkFileTree;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
 import static net.kremianskii.common.Checks.checkNonNull;
 import static net.kremianskii.common.FunctionUtil.unchecked;
@@ -68,8 +71,9 @@ public final class FilesArchiveRepository implements ArchiveRepository {
                 if (!filename.endsWith(".md")) {
                     return CONTINUE;
                 }
+                final var noteId = new NoteId(randomUUID());
                 final var noteName = noteNameFromFilename(filename);
-                final var note = new Note(noteName);
+                final var note = new Note(noteId, noteName);
                 try (final var reader = newBufferedReader(file)) {
                     String line;
                     while ((line = reader.readLine()) != null) {

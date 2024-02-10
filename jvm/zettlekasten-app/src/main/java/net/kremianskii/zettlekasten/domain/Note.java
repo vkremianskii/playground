@@ -1,5 +1,7 @@
 package net.kremianskii.zettlekasten.domain;
 
+import net.kremianskii.zettlekasten.api.CategoryId;
+import net.kremianskii.zettlekasten.api.NoteId;
 import net.kremianskii.zettlekasten.api.NoteName;
 import net.kremianskii.zettlekasten.api.Tag;
 import org.jetbrains.annotations.Nullable;
@@ -13,12 +15,15 @@ import static java.util.Objects.hash;
 import static net.kremianskii.common.Checks.checkNonNull;
 
 public final class Note {
+    public final NoteId id;
     private NoteName name;
     private String text = "";
     public final Set<Tag> tags = new HashSet<>();
-    private @Nullable Category category = null;
+    private @Nullable CategoryId categoryId = null;
 
-    public Note(final NoteName name) {
+    public Note(final NoteId id,
+                final NoteName name) {
+        this.id = checkNonNull(id, "id");
         rename(name);
     }
 
@@ -46,12 +51,23 @@ public final class Note {
         return tags.contains(tag);
     }
 
-    public void setCategory(@Nullable final Category category) {
-        this.category = category;
+    public void setCategoryId(@Nullable final CategoryId categoryId) {
+        this.categoryId = categoryId;
     }
 
-    public Optional<Category> category() {
-        return Optional.ofNullable(category);
+    public Optional<CategoryId> categoryId() {
+        return Optional.ofNullable(categoryId);
+    }
+
+    @Override
+    public String toString() {
+        return "Note{" +
+            "id=" + id +
+            ", name=" + name +
+            ", text='" + text + '\'' +
+            ", tags=" + tags +
+            ", categoryId=" + categoryId +
+            '}';
     }
 
     @Override
@@ -59,22 +75,15 @@ public final class Note {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final var note = (Note) o;
-        return Objects.equals(name, note.name) &&
+        return Objects.equals(id, note.id) &&
+            Objects.equals(name, note.name) &&
             Objects.equals(text, note.text) &&
-            Objects.equals(tags, note.tags);
+            Objects.equals(tags, note.tags) &&
+            Objects.equals(categoryId, note.categoryId);
     }
 
     @Override
     public int hashCode() {
-        return hash(name, text, tags);
-    }
-
-    @Override
-    public String toString() {
-        return "Note{" +
-            "name=" + name +
-            ", text='" + text + '\'' +
-            ", tags=" + tags +
-            '}';
+        return hash(id, name, text, tags, categoryId);
     }
 }

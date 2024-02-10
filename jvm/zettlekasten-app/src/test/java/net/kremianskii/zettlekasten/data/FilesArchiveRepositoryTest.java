@@ -61,13 +61,11 @@ class FilesArchiveRepositoryTest {
 
         // then
         assertTrue(archive.isPresent());
-        assertEquals(
-            anArchive(List.of(aNote(
-                new NoteName("note"),
-                "text",
-                Set.of(new Tag("tag1"), new Tag("tag2")))
-            )),
-            archive.get());
+        assertEquals(1, archive.get().notes.size());
+        var note = archive.get().notes.get(0);
+        assertEquals(new NoteName("note"), note.name());
+        assertEquals("text", note.text());
+        assertEquals(Set.of(new Tag("tag1"), new Tag("tag2")), note.tags);
     }
 
     @Test

@@ -9,7 +9,6 @@ import net.kremianskii.zettlekasten.api.Note;
 import net.kremianskii.zettlekasten.domain.ArchiveRepository;
 
 import java.io.IOException;
-import java.util.List;
 
 import static io.javalin.apibuilder.ApiBuilder.get;
 import static net.kremianskii.common.Checks.checkNonNull;
@@ -39,23 +38,22 @@ public final class ArchiveResource extends Resource {
     private Archive archiveFromDomainArchive(net.kremianskii.zettlekasten.domain.Archive archive) {
         return new Archive(
             archive.notes.stream().map(this::noteFromDomainNote).toList(),
-            List.of());
+            archive.categories.stream().map(this::categoryFromDomainCategory).toList());
     }
 
     private Note noteFromDomainNote(net.kremianskii.zettlekasten.domain.Note note) {
         return new Note(
+            note.id,
             note.name(),
             note.text(),
             note.tags,
-            note.category()
-                .map(this::categoryFromDomainCategory)
-                .orElse(null));
+            note.categoryId().orElse(null));
     }
 
     private Category categoryFromDomainCategory(net.kremianskii.zettlekasten.domain.Category category) {
         return new Category(
+            category.id,
             category.name,
-            null
-        );
+            category.parentId().orElse(null));
     }
 }

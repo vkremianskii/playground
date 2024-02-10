@@ -1,5 +1,6 @@
 package net.kremianskii.zettlekasten.domain;
 
+import net.kremianskii.zettlekasten.api.NoteId;
 import net.kremianskii.zettlekasten.api.NoteName;
 import net.kremianskii.zettlekasten.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.UUID.randomUUID;
 import static net.kremianskii.zettlekasten.NoteFixture.aNote;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -16,7 +18,7 @@ class ArchiveTest {
     void adds_a_note() {
         // given
         var archive = new Archive();
-        var note = new Note(new NoteName("name"));
+        var note = new Note(new NoteId(randomUUID()), new NoteName("name"));
 
         // when
         archive.add(note);
