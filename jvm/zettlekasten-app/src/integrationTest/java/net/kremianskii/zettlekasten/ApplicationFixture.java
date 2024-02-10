@@ -8,14 +8,8 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 
-import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.delete;
-import static java.nio.file.Files.walkFileTree;
+import static net.kremianskii.common.FileUtil.deleteRecursively;
 import static net.kremianskii.zettlekasten.Application.parseConfig;
 
 public class ApplicationFixture {
@@ -36,31 +30,5 @@ public class ApplicationFixture {
     static void tearDown() throws IOException {
         application.stop();
         deleteRecursively(config.zettlekasten().dir());
-    }
-
-    static void deleteRecursively(Path path) throws IOException {
-        walkFileTree(path, new FileVisitor<>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                return CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                delete(file);
-                return CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                return CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                delete(dir);
-                return CONTINUE;
-            }
-        });
     }
 }

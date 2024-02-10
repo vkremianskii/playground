@@ -7,23 +7,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Set;
 
-import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.createDirectory;
 import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.createTempDirectory;
-import static java.nio.file.Files.delete;
 import static java.nio.file.Files.list;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.readAllLines;
-import static java.nio.file.Files.walkFileTree;
+import static net.kremianskii.common.FileUtil.deleteRecursively;
 import static net.kremianskii.zettlekasten.ArchiveFixture.anArchive;
 import static net.kremianskii.zettlekasten.NoteFixture.aNote;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -101,31 +96,5 @@ class FilesArchiveRepositoryTest {
             var file2Lines = readAllLines(filesList.get(1));
             assertEquals(List.of(), file2Lines);
         }
-    }
-
-    void deleteRecursively(Path path) throws IOException {
-        walkFileTree(path, new FileVisitor<>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                return CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                delete(file);
-                return CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                return CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                delete(dir);
-                return CONTINUE;
-            }
-        });
     }
 }
