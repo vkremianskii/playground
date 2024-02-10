@@ -10,21 +10,24 @@ import net.kremianskii.zettlekasten.resource.ArchiveResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.nio.file.Files.exists;
 import static net.kremianskii.common.Checks.checkEqual;
 import static net.kremianskii.common.Checks.checkNonNull;
 import static net.kremianskii.common.Checks.checkThat;
 
 public final class Application {
+    private static final URI DEFAULT_CONFIG_URI = URI.create("classpath:/config.yml");
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     private final ReentrantLock lock = new ReentrantLock();
@@ -43,7 +46,7 @@ public final class Application {
         try {
             checkEqual(state, State.INITIAL, "Must be in Initial state");
             final var address = new InetSocketAddress(config.server().port());
-            if (!Files.exists(config.zettlekasten().dir())) {
+            if (!exists(config.zettlekasten().dir())) {
                 Files.createDirectories(config.zettlekasten().dir());
             }
             javalin = startJavalin(address, resources());
@@ -102,7 +105,7 @@ public final class Application {
 
     public static void main(String[] args) {
         try {
-            final var config = parseConfig(URI.create("classpath:/config.yml"));
+            final var config = parseConfig(configURI());
             final var application = new Application(config);
             application.start();
             Runtime.getRuntime().addShutdownHook(new Thread(application::requestStop));
@@ -117,16 +120,36 @@ public final class Application {
     }
 
     static Config parseConfig(URI uri) throws IOException {
-        if (!uri.getScheme().equals("classpath")) {
-            throw new IllegalArgumentException("URI must use classpath scheme");
+        final InputStream stream;
+        switch (uri.getScheme()) {
+            case "classpath": {
+                final var resource = Application.class.getResource(uri.getPath());
+                if (resource == null) {
+                    throw new RuntimeException("Classpath resource not found: " + uri.getPath());
+                }
+                stream = resource.openStream();
+                break;
+            }
+            case "file":
+                stream = uri.toURL().openStream();
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported URI scheme: " + uri.getScheme());
         }
-        final var resource = Application.class.getResource(uri.getPath());
-        if (resource == null) {
-            throw new RuntimeException("Classpath resource not found: " + uri.getPath());
+        try {
+            final var mapper = new ObjectMapper(new YAMLFactory());
+            return mapper.readValue(stream, Config.class);
+        } finally {
+            stream.close();
         }
-        final var file = new File(resource.getPath());
-        final var mapper = new ObjectMapper(new YAMLFactory());
-        return mapper.readValue(file, Config.class);
+    }
+
+    private static URI configURI() {
+        final var cwdConfigPath = Paths.get("config.yml");
+        if (exists(cwdConfigPath)) {
+            return cwdConfigPath.toUri();
+        }
+        return DEFAULT_CONFIG_URI;
     }
 
     private enum State {
