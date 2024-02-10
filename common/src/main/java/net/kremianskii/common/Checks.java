@@ -21,6 +21,12 @@ public final class Checks {
         return value;
     }
 
+    public static <T> void checkEqual(final T lhs, final T rhs, final String message) {
+        if (!lhs.equals(rhs)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
     public static <T> T checkThat(final T value,
                                   final Predicate<T> condition,
                                   final String message) {

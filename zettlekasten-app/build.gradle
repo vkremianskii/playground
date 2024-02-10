@@ -1,13 +1,21 @@
 buildscript {
     dependencies {
-        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
+        classpath "gradle.plugin.com.github.johnrengelman:shadow:${shadowJarVersion}"
     }
 }
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'java'
+    id 'com.github.johnrengelman.shadow' version "${shadowJarVersion}"
+    id 'application'
     id 'jvm-test-suite'
+}
+
+dependencies {
+    implementation project(':common-rest')
+    implementation project(':zettlekasten-api')
+    implementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 testing {
@@ -23,11 +31,8 @@ testing {
     }
 }
 
-dependencies {
-    implementation project(':common-rest')
-    implementation project(':zettlekasten-api')
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+tasks.named("check") {
+    dependsOn(testing.suites.integrationTest)
 }
 
 sourceSets {
@@ -38,8 +43,6 @@ sourceSets {
     }
 }
 
-jar {
-    manifest {
-        attributes 'Main-Class': 'net.kremianskii.zettlekasten.Application'
-    }
+application {
+    mainClass = 'net.kremianskii.zettlekasten.Application'
 }

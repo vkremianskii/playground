@@ -1,17 +1,15 @@
 package net.kremianskii.zettlekasten.resource;
 
-import com.sun.net.httpserver.HttpExchange;
+import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
 import net.kremianskii.common.rest.Resource;
-import net.kremianskii.common.rest.Route;
-import net.kremianskii.common.rest.http.HttpMethod;
 import net.kremianskii.zettlekasten.api.Archive;
 import net.kremianskii.zettlekasten.api.Note;
 import net.kremianskii.zettlekasten.domain.ArchiveRepository;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 
+import static io.javalin.apibuilder.ApiBuilder.get;
 import static net.kremianskii.common.Checks.checkNonNull;
 
 public final class ArchiveResource extends Resource {
@@ -19,12 +17,21 @@ public final class ArchiveResource extends Resource {
 
     public ArchiveResource(final ArchiveRepository repository) {
         this.repository = checkNonNull(repository, "repository");
-        registerRoutes(List.of(
-            new Route(HttpMethod.GET, "/archive", this::getArchive)));
     }
 
-    private Optional<Archive> getArchive(HttpExchange exchange) throws IOException {
-        return repository.find().map(this::archiveFromDomainArchive);
+    @Override
+    public void registerRoutes() {
+        get("/archive", this::getArchive);
+    }
+
+    private void getArchive(Context context) throws IOException {
+        repository.find()
+            .map(this::archiveFromDomainArchive)
+            .ifPresentOrElse(
+                context::json,
+                () -> {
+                    throw new NotFoundResponse();
+                });
     }
 
     private Archive archiveFromDomainArchive(net.kremianskii.zettlekasten.domain.Archive archive) {

@@ -6,11 +6,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.createTempDirectory;
@@ -21,30 +21,22 @@ public class ApplicationFixture {
     protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
         .registerModule(new Jdk8Module());
     protected static Path zettlekastenDirectory;
+    protected static InetSocketAddress address;
 
     static Application application;
-    static AtomicBoolean cancelled;
-    static Thread thread;
 
     @BeforeAll
     static void setup() throws IOException {
-        application = new Application();
         zettlekastenDirectory = createTempDirectory("zettlekasten");
-        cancelled = new AtomicBoolean(false);
-        thread = new Thread(() -> {
-            try {
-                application.run(zettlekastenDirectory, cancelled::get);
-            } catch (final IOException ignored) {
-            }
-        });
-        thread.start();
+        address = new InetSocketAddress("localhost", 8080);
+        application = new Application(zettlekastenDirectory, address);
+        application.start();
     }
 
     @AfterAll
-    static void tearDown() throws InterruptedException, IOException {
+    static void tearDown() throws IOException {
+        application.stop();
         deleteRecursively(zettlekastenDirectory);
-        cancelled.set(true);
-        thread.join();
     }
 
     static void deleteRecursively(Path path) throws IOException {
