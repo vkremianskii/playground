@@ -3,7 +3,6 @@ package net.kremianskii.zettlekasten.data;
 import net.kremianskii.zettlekasten.api.NoteName;
 import net.kremianskii.zettlekasten.api.Tag;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,6 +17,7 @@ import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.list;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.readAllLines;
+import static java.time.Instant.now;
 import static net.kremianskii.common.FileUtil.deleteRecursively;
 import static net.kremianskii.zettlekasten.ArchiveFixture.anArchive;
 import static net.kremianskii.zettlekasten.NoteFixture.aNote;
@@ -27,11 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FilesArchiveRepositoryTest {
     Path rootDirectory;
 
-    @BeforeEach
-    void setup() throws IOException {
-        rootDirectory = createTempDirectory("zettlekasten");
-    }
-
     @AfterEach
     void tearDown() throws IOException {
         if (rootDirectory != null) {
@@ -40,8 +35,21 @@ class FilesArchiveRepositoryTest {
     }
 
     @Test
+    void returns_empty_archive_if_root_dir_not_exists() throws IOException {
+        // given
+        var repository = new FilesArchiveRepository(Path.of("non-existent"));
+
+        // when
+        var archive = repository.find();
+
+        // then
+        assertTrue(archive.isEmpty());
+    }
+
+    @Test
     void finds_archive_in_directory() throws IOException {
         // given
+        rootDirectory = createTempDirectory("zettlekasten");
         var repository = new FilesArchiveRepository(rootDirectory);
         var notePath = Paths.get(rootDirectory.toString(), "note.md");
         try (var noteWriter = newBufferedWriter(notePath)) {
@@ -71,6 +79,8 @@ class FilesArchiveRepositoryTest {
     @Test
     void saves_archive_to_directory() throws IOException {
         // given
+        var tempDir = System.getProperty("java.io.tmpdir");
+        rootDirectory = Paths.get(tempDir, "zettlekasten" + now().toEpochMilli());
         var repository = new FilesArchiveRepository(rootDirectory);
         var archive = anArchive(List.of(
             aNote(
@@ -79,7 +89,6 @@ class FilesArchiveRepositoryTest {
                 Set.of(new Tag("tag1"), new Tag("tag2"))),
             aNote(new NoteName("name2"), "", Set.of())
         ));
-        createDirectory(Paths.get(rootDirectory.toString(), "child"));
 
         // when
         repository.save(archive);

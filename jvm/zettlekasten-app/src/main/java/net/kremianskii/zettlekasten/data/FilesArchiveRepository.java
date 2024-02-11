@@ -15,15 +15,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.lang.System.lineSeparator;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
+import static java.nio.file.Files.createDirectory;
 import static java.nio.file.Files.list;
 import static java.nio.file.Files.newBufferedReader;
 import static java.nio.file.Files.newBufferedWriter;
+import static java.nio.file.Files.notExists;
 import static java.nio.file.Files.walkFileTree;
+import static java.util.Optional.empty;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
 import static net.kremianskii.common.Checks.checkNonNull;
@@ -38,6 +40,9 @@ public final class FilesArchiveRepository implements ArchiveRepository {
 
     @Override
     public void save(Archive archive) throws IOException {
+        if (notExists(rootDirectory)) {
+            createDirectory(rootDirectory);
+        }
         try (final var files = list(rootDirectory)) {
             files.forEach(unchecked(FileUtil::deleteRecursively));
         }
@@ -58,6 +63,9 @@ public final class FilesArchiveRepository implements ArchiveRepository {
 
     @Override
     public Optional<Archive> find() throws IOException {
+        if (notExists(rootDirectory)) {
+            return empty();
+        }
         final var archive = new Archive();
         walkFileTree(rootDirectory, new FileVisitor<>() {
             @Override

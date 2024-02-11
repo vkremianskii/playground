@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
@@ -41,14 +40,11 @@ public final class Application {
         this.config = checkNonNull(config, "config");
     }
 
-    void start() throws IOException {
+    void start() {
         lock.lock();
         try {
             checkEqual(state, State.INITIAL, "Must be in Initial state");
             final var address = new InetSocketAddress(config.server().port());
-            if (!exists(config.zettlekasten().dir())) {
-                Files.createDirectories(config.zettlekasten().dir());
-            }
             javalin = startJavalin(address, resources());
             state = State.STARTED;
         } finally {

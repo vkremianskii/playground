@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeAll;
 import java.io.IOException;
 import java.net.URI;
 
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.notExists;
 import static net.kremianskii.common.FileUtil.deleteRecursively;
 import static net.kremianskii.zettlekasten.Application.parseConfig;
 
@@ -22,6 +24,9 @@ public class ApplicationFixture {
     @BeforeAll
     static void setup() throws IOException {
         config = parseConfig(URI.create("classpath:/test-config.yml"));
+        if (notExists(config.zettlekasten().dir())) {
+            createDirectories(config.zettlekasten().dir());
+        }
         application = new Application(config);
         application.start();
     }
