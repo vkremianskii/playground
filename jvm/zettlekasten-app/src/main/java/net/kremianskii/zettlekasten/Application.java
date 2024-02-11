@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
@@ -107,10 +107,10 @@ public final class Application {
             Runtime.getRuntime().addShutdownHook(new Thread(application::requestStop));
             try {
                 application.awaitStopping();
-            } catch (InterruptedException ignored) {
+            } catch (final InterruptedException ignored) {
             }
             application.stop();
-        } catch (Exception exc) {
+        } catch (final Exception exc) {
             LOGGER.error("Application failure", exc);
         }
     }
@@ -141,7 +141,7 @@ public final class Application {
     }
 
     private static URI configURI() {
-        final var cwdConfigPath = Paths.get("config.yml");
+        final var cwdConfigPath = Path.of("config.yml");
         if (exists(cwdConfigPath)) {
             return cwdConfigPath.toUri();
         }

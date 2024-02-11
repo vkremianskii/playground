@@ -16,6 +16,10 @@ public final class Archive {
         notes.add(note);
     }
 
+    public void add(final Category category) {
+        categories.add(category);
+    }
+
     public List<Note> notesByTag(Tag tag) {
         return notes.stream()
             .filter(note -> note.tagged(tag))
@@ -23,22 +27,24 @@ public final class Archive {
     }
 
     @Override
+    public String toString() {
+        return "Archive{" +
+            "notes=" + notes +
+            ", categories=" + categories +
+            '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final var archive = (Archive) o;
-        return Objects.equals(notes, archive.notes);
+        return Objects.equals(notes, archive.notes) &&
+            Objects.equals(categories, archive.categories);
     }
 
     @Override
     public int hashCode() {
-        return hash(notes);
-    }
-
-    @Override
-    public String toString() {
-        return "Archive{" +
-            "notes=" + notes +
-            '}';
+        return hash(notes, categories);
     }
 }

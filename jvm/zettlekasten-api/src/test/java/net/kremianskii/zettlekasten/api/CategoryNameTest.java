@@ -8,10 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CategoryNameTest {
 
     @Test
-    void throws_if_value_is_null_or_empty_in_ctor() {
-        // expect
+    void throws_if_name_does_not_match_pattern_in_ctor() {
         assertThrows(IllegalArgumentException.class, () -> new CategoryName(null));
         assertThrows(IllegalArgumentException.class, () -> new CategoryName(""));
-        assertDoesNotThrow(() -> new CategoryName(" "));
+        assertDoesNotThrow(() -> new CategoryName("aZ0_ "));
     }
 }

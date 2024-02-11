@@ -31,9 +31,9 @@ class ArchiveTest {
     void finds_notes_by_tag() {
         // given
         var tag = new Tag("value");
-        var note1 = aNote(new NoteName("name"), "text", Set.of(tag));
-        var note2 = aNote(new NoteName("name"), "text", Set.of());
-        var note3 = aNote(new NoteName("name"), "text", Set.of(tag));
+        var note1 = aNote(new NoteName("name"), "text", Set.of(tag), null);
+        var note2 = aNote(new NoteName("name"), "text", Set.of(), null);
+        var note3 = aNote(new NoteName("name"), "text", Set.of(tag), null);
         var archive = new Archive();
         archive.add(note1);
         archive.add(note2);

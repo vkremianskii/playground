@@ -12,7 +12,7 @@ public final class FunctionUtil {
         return arg -> {
             try {
                 consumer.accept(arg);
-            } catch (Exception exc) {
+            } catch (final Exception exc) {
                 throw new RuntimeException(exc);
             }
         };
@@ -22,7 +22,7 @@ public final class FunctionUtil {
         return arg -> {
             try {
                 return function.apply(arg);
-            } catch (Exception exc) {
+            } catch (final Exception exc) {
                 throw new RuntimeException(exc);
             }
         };

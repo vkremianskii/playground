@@ -19,10 +19,13 @@ class MemoryArchiveRepositoryTest {
     void saves_archive_in_memory() {
         // given
         var repository = new MemoryArchiveRepository();
-        var archive = anArchive(List.of(aNote(
-            new NoteName("name"),
-            "text",
-            Set.of(new Tag("tag")))));
+        var archive = anArchive(
+            List.of(aNote(
+                new NoteName("name"),
+                "text",
+                Set.of(new Tag("tag")),
+                null)),
+            List.of());
 
         // expect
         assertDoesNotThrow(() -> repository.save(archive));
@@ -32,10 +35,13 @@ class MemoryArchiveRepositoryTest {
     void finds_archive_in_memory() {
         // given
         var repository = new MemoryArchiveRepository();
-        var archive = anArchive(List.of(aNote(
-            new NoteName("name"),
-            "text",
-            Set.of(new Tag("tag")))));
+        var archive = anArchive(
+            List.of(aNote(
+                new NoteName("name"),
+                "text",
+                Set.of(new Tag("tag")),
+                null)),
+            List.of());
         repository.save(archive);
 
         // when

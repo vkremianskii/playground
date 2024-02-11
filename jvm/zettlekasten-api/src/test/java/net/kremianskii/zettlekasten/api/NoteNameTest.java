@@ -11,7 +11,6 @@ class NoteNameTest {
     void throws_if_name_does_not_match_pattern_in_ctor() {
         assertThrows(IllegalArgumentException.class, () -> new NoteName(null));
         assertThrows(IllegalArgumentException.class, () -> new NoteName(""));
-        assertThrows(IllegalArgumentException.class, () -> new NoteName("a_0"));
-        assertDoesNotThrow(() -> new NoteName("a 0"));
+        assertDoesNotThrow(() -> new NoteName("aZ0_ "));
     }
 }
